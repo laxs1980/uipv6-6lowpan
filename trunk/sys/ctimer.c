@@ -66,11 +66,10 @@ PROCESS_THREAD(ctimer_process, ev, data)
   struct ctimer *c;
   PROCESS_BEGIN();
 
-  printf("ctimer process entry\n");
-
   for(c = list_head(ctimer_list); c != NULL; c = c->next) {
     etimer_set(&c->etimer, c->etimer.timer.interval);
   }
+
   initialized = 1;
 
   while(1) {

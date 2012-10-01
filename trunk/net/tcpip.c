@@ -765,7 +765,6 @@ PROCESS_THREAD(tcpip_process, ev, data)
 #endif /* UIP_CONF_IPV6_RPL */
 
   while(1) {
-	printf("tcpip# receive event 0x%02X, time %lu\n", ev, clock_time());
     PROCESS_YIELD();
     eventhandler(ev, data);
   }
