@@ -12,7 +12,6 @@ INCLUDES=-I"./lib/"\
 CFLAGS=-std=c99\
 	   -DUIP_CONF_IPV6\
 	   -DDEBUG=1\
-	   -Dlinux\
 	   -g
 
 SRC=$(wildcard ./lib/*.c)
