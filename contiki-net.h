@@ -41,6 +41,7 @@
 #include "net/uip.h"
 #include "net/uiplib.h"
 #include "net/uip-udp-packet.h"
+#include "net/uip_arp.h"
 
 #if UIP_CONF_IPV6
 #include "net/uip-icmp6.h"

@@ -6,16 +6,20 @@ LD=gcc
 INCLUDES=-I"./lib/"\
 	-I"./sys/"\
 	-I"./net/"\
+	-I"./cpu/native/net/"\
 	-I"./"
 
 CFLAGS=-std=c99\
 	   -DUIP_CONF_IPV6\
+	   -DDEBUG=1\
+	   -Dlinux\
 	   -g
 
 SRC=$(wildcard ./lib/*.c)
 SRC+=$(wildcard ./net/*.c)
 SRC+=$(wildcard ./sys/*.c)
 SRC+=$(wildcard ./platform/native/*.c)
+SRC+=$(wildcard ./cpu/native/net/*.c)
 SRC+=main.c
 
 OBJ=$(SRC:.c=.o)
