@@ -19,6 +19,7 @@ SRC+=$(wildcard ./net/*.c)
 SRC+=$(wildcard ./sys/*.c)
 SRC+=$(wildcard ./platform/native/*.c)
 SRC+=$(wildcard ./cpu/native/net/*.c)
+SRC+=tcp_echo_test.c
 SRC+=main.c
 
 OBJ=$(SRC:.c=.o)

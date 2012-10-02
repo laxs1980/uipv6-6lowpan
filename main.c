@@ -4,7 +4,9 @@
 
 #include "net/tcpip.h"
 #include "net/uip-ds6.h"
-#include "cpu/native/net/tapdev-drv.h"
+#include "cpu/native/net/tapdev6.h"
+
+#define BUF ((struct uip_eth_hdr *)&uip_buf[0])
 
 int main(int argc, char **argv)
 {
@@ -36,7 +38,9 @@ int main(int argc, char **argv)
 	printf("Ok\n");
 
 	printf("Init tapdev process\n");
-	process_start(&tapdev_process, NULL);
+	tapdev_init();
+	tcpip_set_outputfunc(tapdev_send);
+	//process_start(&tapdev_process, NULL);
 	printf("Ok\n");
 
 	printf("Start tcpip process\n");
@@ -71,9 +75,30 @@ int main(int argc, char **argv)
 	while(1){
 		process_run();
 		etimer_request_poll();
-	}
+		uip_len = tapdev_poll();
 
-	return 0;
+		if(uip_len > 0) {
+#if UIP_CONF_IPV6
+			if(BUF->type == uip_htons(UIP_ETHTYPE_IPV6)) {
+				tcpip_input();
+			} else
+#endif /* UIP_CONF_IPV6 */
+				if(BUF->type == uip_htons(UIP_ETHTYPE_IP)) {
+					uip_len -= sizeof(struct uip_eth_hdr);
+					tcpip_input();
+				} else if(BUF->type == uip_htons(UIP_ETHTYPE_ARP)) {
+#if !UIP_CONF_IPV6 //math
+					uip_arp_arpin();
+					/* If the above function invocation resulted in data that
+					   should be sent out on the network, the global variable
+					   uip_len is set to a value > 0. */
+					if(uip_len > 0) {
+						tapdev_send();
+					}
+#endif 
+				}
+		}
+	}
 }
 
 void uip_log(char *m)

@@ -174,6 +174,10 @@ typedef unsigned long clock_time_t;
 
 #define LOG_CONF_ENABLED 1
 
+//#define UIP_APPCALL tcp_echo_test_app
+
+#define UIP_LOGGING 1
+
 /* Not part of C99 but actually present */
 int strcasecmp(const char*, const char*);
 
