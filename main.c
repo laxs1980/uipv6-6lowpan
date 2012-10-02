@@ -37,10 +37,9 @@ int main(int argc, char **argv)
 	ctimer_init();
 	printf("Ok\n");
 
-	printf("Init tapdev process\n");
+	printf("Init tapdev\n");
 	tapdev_init();
 	tcpip_set_outputfunc(tapdev_send);
-	//process_start(&tapdev_process, NULL);
 	printf("Ok\n");
 
 	printf("Start tcpip process\n");
@@ -77,26 +76,10 @@ int main(int argc, char **argv)
 		etimer_request_poll();
 		uip_len = tapdev_poll();
 
-		if(uip_len > 0) {
-#if UIP_CONF_IPV6
-			if(BUF->type == uip_htons(UIP_ETHTYPE_IPV6)) {
+		if(uip_len > 0){
+			if(BUF->type == uip_htons(UIP_ETHTYPE_IPV6)){
 				tcpip_input();
-			} else
-#endif /* UIP_CONF_IPV6 */
-				if(BUF->type == uip_htons(UIP_ETHTYPE_IP)) {
-					uip_len -= sizeof(struct uip_eth_hdr);
-					tcpip_input();
-				} else if(BUF->type == uip_htons(UIP_ETHTYPE_ARP)) {
-#if !UIP_CONF_IPV6 //math
-					uip_arp_arpin();
-					/* If the above function invocation resulted in data that
-					   should be sent out on the network, the global variable
-					   uip_len is set to a value > 0. */
-					if(uip_len > 0) {
-						tapdev_send();
-					}
-#endif 
-				}
+			}
 		}
 	}
 }
