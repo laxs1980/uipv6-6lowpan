@@ -8,6 +8,46 @@
 
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
 
+PROCESS(tcp_server, "TCP server");
+
+/*---------------------------------------------------------------------------*/
+PROCESS_THREAD(tcp_server, ev, data)
+{
+	PROCESS_BEGIN();
+
+	tcp_listen(UIP_HTONS(8080));
+
+	while(1) {
+		PROCESS_WAIT_EVENT_UNTIL(ev == tcpip_event);
+		printf("TCP server: receive TCP event\n");
+
+		if(uip_closed() || uip_aborted() || uip_timedout()) {
+			printf("TCP server: connection closed\n");
+		} else if(uip_connected()) {
+			printf("TCP server: connected\n");
+		}
+
+		if(uip_newdata()) {
+			printf("TCP server: receive new data\n");
+			uint16_t len = uip_datalen();
+			uint8_t *ptr = uip_appdata;
+			while(len--){
+				printf("%c", *ptr++);
+			}
+			printf("\n");
+		}
+		if(uip_rexmit() ||
+				uip_newdata() ||
+				uip_acked() ||
+				uip_connected() ||
+				uip_poll()) {
+			//senddata();
+		}
+	}
+  
+  PROCESS_END();
+}
+
 int main(int argc, char **argv)
 {
 	printf("uIPv6 test project\n");
@@ -44,6 +84,10 @@ int main(int argc, char **argv)
 
 	printf("Start tcpip process\n");
 	process_start(&tcpip_process, NULL);
+	printf("Ok\n");
+
+	printf("Start TCP server on 8080 port\n");
+	process_start(&tcp_server, NULL);
 	printf("Ok\n");
 
 	uint8_t i;
