@@ -5,6 +5,7 @@
 #include "net/tcpip.h"
 #include "net/uip-ds6.h"
 #include "cpu/native/net/tapdev6.h"
+#include "cpu/native/net/udpclidev.h"
 
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
 
@@ -52,6 +53,10 @@ int main(int argc, char **argv)
 {
 	printf("uIPv6 test project\n");
 
+	printf("Init udpdevcli\n");
+	udpclidev_init();
+	printf("Ok\n");
+
     uip_ipaddr_t ipaddr;
     uip_ip6addr(&ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 0);
     if((ipaddr.u16[0] != 0) ||
@@ -77,12 +82,13 @@ int main(int argc, char **argv)
 	ctimer_init();
 	printf("Ok\n");
 
-	printf("Init tapdev\n");
-	tapdev_init();
-	tcpip_set_outputfunc(tapdev_send);
-	printf("Ok\n");
+//	printf("Init tapdev\n");
+//	tapdev_init();
+//	tcpip_set_outputfunc(tapdev_send);
+//	printf("Ok\n");
 
 	printf("Start tcpip process\n");
+	tcpip_set_outputfunc(udpcli_send);
 	process_start(&tcpip_process, NULL);
 	printf("Ok\n");
 
@@ -118,13 +124,16 @@ int main(int argc, char **argv)
 	while(1){
 		process_run();
 		etimer_request_poll();
-		uip_len = tapdev_poll();
+//		uip_len = tapdev_poll();
+
+		uip_len = udpclidev_poll();
 
 		if(uip_len > 0){
 			if(BUF->type == uip_htons(UIP_ETHTYPE_IPV6)){
 				tcpip_input();
 			}
 		}
+		fflush(stdout);
 	}
 }
 
