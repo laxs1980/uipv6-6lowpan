@@ -14,7 +14,7 @@ struct sockaddr_in servaddr,cliaddr;
 char sendline[1000];
 char recvline[1000];
 
-void udpclidev_init(void)
+void udpdev_init(void)
 {
 	char *env_s_ip;
 	char *env_s_port;
@@ -79,19 +79,19 @@ void udpclidev_init(void)
 
 	int flags = fcntl(sockfd, F_GETFL, 0);
 	if (flags < 0){
-		printf("udpclidev# fcntl error\n");
+		printf("udpdev# fcntl error\n");
 		exit(1);
 	}
 	flags = (flags|O_NONBLOCK);
 	fcntl(sockfd, F_SETFL, flags);
 }
 
-uint16_t udpclidev_poll(void)
+uint16_t udpdev_poll(void)
 {
 	int ret = 0;
 	ret = recvfrom(sockfd, uip_buf, UIP_BUFSIZE, 0, NULL, NULL);
 	//if(ret == -1){
-	//	printf("udpclidev# recv error: %d\n", errno);
+	//	printf("udpdev# recv error: %d\n", errno);
 	//	exit(1);
 	//}
 	if(ret > 0){
@@ -101,7 +101,7 @@ uint16_t udpclidev_poll(void)
 	return 0;
 }
 
-uint8_t udpcli_send(uip_lladdr_t *lladdr)
+uint8_t udpdev_send(uip_lladdr_t *lladdr)
 {
   /*
    * If L3 dest is multicast, build L2 multicast address
@@ -128,7 +128,7 @@ uint8_t udpcli_send(uip_lladdr_t *lladdr)
 		  (struct sockaddr *)&cliaddr, sizeof(cliaddr));
 
   if(ret == -1){
-	  printf("udpclidev# sendto error\n");
+	  printf("udpdev# sendto error\n");
 	  exit(1);
   }
 
