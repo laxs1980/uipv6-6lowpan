@@ -11,16 +11,6 @@ exit_hook()
 	exit 1
 }
 
-kldstat -n if_tap > /dev/null
-if [ $? ]
-then
-	echo "Tap module loaded, unload it."
-	kldunload if_tap
-fi
-
-echo "Load tap module."
-kldload if_tap
-
 echo "Run app."
 export UDPDEV_S_IP="127.0.0.1"
 export UDPDEV_C_IP="127.0.0.1"

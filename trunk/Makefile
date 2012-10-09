@@ -18,7 +18,10 @@ SRC+=$(wildcard ./net/*.c)
 SRC+=$(wildcard ./sys/*.c)
 SRC+=$(wildcard ./platform/native/*.c)
 SRC+=$(wildcard ./cpu/native/net/*.c)
-SRC+=main.c
+
+ifdef APPNAME
+	SRC+=./apps/$(APPNAME)/main.c
+endif
 
 OBJ=$(SRC:.c=.o)
 
