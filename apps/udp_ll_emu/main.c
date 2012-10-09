@@ -9,6 +9,50 @@
 
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
 
+uip_ipaddr_t srv_addr;
+
+PROCESS(tcp_client, "TCP client");
+
+PROCESS_THREAD(tcp_client, ev, data)
+{
+	static struct uip_conn *conn;
+	PROCESS_BEGIN();
+
+	conn = tcp_connect(&srv_addr, UIP_HTONS(8080), NULL);
+
+	if(conn == NULL) {
+		printf("TCP client: connect error\n");
+	}
+
+	static struct timer tmr;
+	timer_set(&tmr, 5000);
+
+	while(1){
+		PROCESS_WAIT_EVENT_UNTIL(ev == tcpip_event);
+		printf("TCP client: receive TCPIP event\n");
+		if(uip_newdata()) {
+			printf("TCP client: receive new data\n");
+			uint16_t len = uip_datalen();
+			uint8_t *ptr = uip_appdata;
+			while(len--){
+				printf("%c", *ptr++);
+			}
+			printf("\n");
+		}
+
+		PROCESS_WAIT_UNTIL(timer_expired(&tmr));
+
+		if(timer_expired(&tmr)){
+			timer_restart(&tmr);
+			printf("TCP client: timer expired: %lu\n", clock_time());
+			printf("TCP client: send message\n");
+			memcpy(uip_appdata, "hello", 6);
+			uip_send(uip_appdata, 6);
+		}
+	}
+	PROCESS_END();
+}
+
 PROCESS(tcp_server, "TCP server");
 
 /*---------------------------------------------------------------------------*/
@@ -36,6 +80,9 @@ PROCESS_THREAD(tcp_server, ev, data)
 				printf("%c", *ptr++);
 			}
 			printf("\n");
+			printf("TCP server: send echo message\n");
+			memcpy(uip_appdata, "Ok", 3);
+			uip_send(uip_appdata, 3);
 		}
 		if(uip_rexmit() ||
 				uip_newdata() ||
@@ -82,19 +129,37 @@ int main(int argc, char **argv)
 	ctimer_init();
 	printf("Ok\n");
 
-//	printf("Init tapdev\n");
-//	tapdev_init();
-//	tcpip_set_outputfunc(tapdev_send);
-//	printf("Ok\n");
-
 	printf("Start tcpip process\n");
 	tcpip_set_outputfunc(udpdev_send);
 	process_start(&tcpip_process, NULL);
 	printf("Ok\n");
 
-	printf("Start TCP server on 8080 port\n");
-	process_start(&tcp_server, NULL);
-	printf("Ok\n");
+	char *env_c_addr = getenv ("APP_C_ADDR");
+	if (env_c_addr == NULL){
+		printf ("Start TCP server on 8080 port\n");
+		process_start(&tcp_server, NULL);
+		printf("Ok\n");
+	}else{
+		printf("Start TCP client\n");
+		srv_addr.u8[0] = 0xFE;
+		srv_addr.u8[1] = 0x80;
+		srv_addr.u8[2] = 0x00;
+		srv_addr.u8[3] = 0x00;
+		srv_addr.u8[4] = 0x00;
+		srv_addr.u8[5] = 0x00;
+		srv_addr.u8[6] = 0x00;
+		srv_addr.u8[7] = 0x00;
+		srv_addr.u8[8] = 0x02;
+		srv_addr.u8[9] = 0x06;
+		srv_addr.u8[10] = 0x98;
+		srv_addr.u8[11] = 0xFF;
+		srv_addr.u8[12] = 0xFE;
+		srv_addr.u8[13] = 0x00;
+		srv_addr.u8[14] = 0x02;
+		srv_addr.u8[15] = atoi(env_c_addr);
+		process_start(&tcp_client, NULL);
+		printf("Ok\n");
+	}
 
 	uint8_t i;
 	for(i = 0; i < UIP_DS6_ADDR_NB; i++) {
@@ -124,7 +189,6 @@ int main(int argc, char **argv)
 	while(1){
 		process_run();
 		etimer_request_poll();
-//		uip_len = tapdev_poll();
 
 		uip_len = udpdev_poll();
 
