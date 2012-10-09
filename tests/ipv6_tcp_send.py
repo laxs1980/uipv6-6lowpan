@@ -17,3 +17,6 @@ data = s.recv(1024)
 if not data: exit(1)
 
 print data
+
+s.close()
+

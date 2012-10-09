@@ -5,7 +5,6 @@
 #include "net/tcpip.h"
 #include "net/uip-ds6.h"
 #include "cpu/native/net/tapdev6.h"
-#include "cpu/native/net/udpdev.h"
 
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
 
@@ -36,6 +35,9 @@ PROCESS_THREAD(tcp_server, ev, data)
 				printf("%c", *ptr++);
 			}
 			printf("\n");
+
+			printf("TCP server: send echo message\n");
+			uip_send(uip_appdata, uip_datalen());
 		}
 		if(uip_rexmit() ||
 				uip_newdata() ||
@@ -52,10 +54,6 @@ PROCESS_THREAD(tcp_server, ev, data)
 int main(int argc, char **argv)
 {
 	printf("uIPv6 test project\n");
-
-	printf("Init udpdevcli\n");
-	udpdev_init();
-	printf("Ok\n");
 
     uip_ipaddr_t ipaddr;
     uip_ip6addr(&ipaddr, 0xaaaa, 0, 0, 0, 0, 0, 0, 0);
@@ -82,13 +80,12 @@ int main(int argc, char **argv)
 	ctimer_init();
 	printf("Ok\n");
 
-//	printf("Init tapdev\n");
-//	tapdev_init();
-//	tcpip_set_outputfunc(tapdev_send);
-//	printf("Ok\n");
+	printf("Init tapdev\n");
+	tapdev_init();
+	tcpip_set_outputfunc(tapdev_send);
+	printf("Ok\n");
 
 	printf("Start tcpip process\n");
-	tcpip_set_outputfunc(udpdev_send);
 	process_start(&tcpip_process, NULL);
 	printf("Ok\n");
 
@@ -124,16 +121,13 @@ int main(int argc, char **argv)
 	while(1){
 		process_run();
 		etimer_request_poll();
-//		uip_len = tapdev_poll();
-
-		uip_len = udpdev_poll();
+		uip_len = tapdev_poll();
 
 		if(uip_len > 0){
 			if(BUF->type == uip_htons(UIP_ETHTYPE_IPV6)){
 				tcpip_input();
 			}
 		}
-		fflush(stdout);
 	}
 }
 
