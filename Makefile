@@ -11,10 +11,13 @@ INCLUDES=-I"./lib/"\
 
 CFLAGS=-std=c99\
 	   -DUIP_CONF_IPV6\
+	   -DUIP_CONF_IPV6_RPL\
 	   -g
 
 SRC=$(wildcard ./lib/*.c)
 SRC+=$(wildcard ./net/*.c)
+SRC+=$(wildcard ./net/rime/*.c)
+SRC+=$(wildcard ./net/rpl/*.c)
 SRC+=$(wildcard ./sys/*.c)
 SRC+=$(wildcard ./platform/native/*.c)
 SRC+=$(wildcard ./cpu/native/net/*.c)
