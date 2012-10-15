@@ -24,6 +24,7 @@ SRC+=$(wildcard ./cpu/native/net/*.c)
 
 ifdef APPNAME
 	SRC+=./apps/$(APPNAME)/main.c
+	INCLUDES+=-I"./apps/$(APPNAME)/"
 endif
 
 OBJ=$(SRC:.c=.o)
