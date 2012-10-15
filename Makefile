@@ -16,6 +16,8 @@ CFLAGS=-std=c99\
 
 SRC=$(wildcard ./lib/*.c)
 SRC+=$(wildcard ./net/*.c)
+SRC+=$(wildcard ./dev/*.c)
+SRC+=$(wildcard ./net/mac/*.c)
 SRC+=$(wildcard ./net/rime/*.c)
 SRC+=$(wildcard ./net/rpl/*.c)
 SRC+=$(wildcard ./sys/*.c)
