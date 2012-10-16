@@ -1,10 +1,13 @@
 #include "dev/nullradio.h"
 
+#include <stdint.h>
+
 
 /*---------------------------------------------------------------------------*/
 static int
 init(void)
 {
+	printf("radio driver init\n");
   return 0;
 }
 /*---------------------------------------------------------------------------*/
@@ -23,6 +26,13 @@ transmit(unsigned short transmit_len)
 static int
 send(const void *payload, unsigned short payload_len)
 {
+	printf("nullradio# send %d\n", payload_len);
+	int len = payload_len;
+	uint8_t *buf = (uint8_t*)payload;
+	while(len--){
+		printf("%02X", *buf++);
+	}
+	printf("\n");
   prepare(payload, payload_len);
   return transmit(payload_len);
 }
