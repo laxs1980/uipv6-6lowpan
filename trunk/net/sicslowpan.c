@@ -1324,6 +1324,7 @@ packet_sent(void *ptr, int status, int transmissions)
 static void
 send_packet(rimeaddr_t *dest)
 {
+  printf("sicslowpan.c# send\n");
   /* Set the link layer destination address for the packet as a
    * packetbuf attribute. The MAC layer can access the destination
    * address with the function packetbuf_addr(PACKETBUF_ADDR_RECEIVER).
@@ -1338,6 +1339,8 @@ send_packet(rimeaddr_t *dest)
   /* Provide a callback function to receive the result of
      a packet transmission. */
   NETSTACK_MAC.send(&packet_sent, NULL);
+
+
 
   /* If we are sending multiple packets in a row, we need to let the
      watchdog know that we are still alive. */
