@@ -1,0 +1,1 @@
+Standalone version of Contiki OS IPv6 stack with 6lowpan capabilities
